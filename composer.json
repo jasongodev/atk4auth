@@ -1,0 +1,35 @@
+{
+    "name": "sirjasongo/atk4auth",
+    "description": "ATK4 User Authentication",
+    "type": "library",
+    "keywords": ["atk4", "hybridauth"],
+    "homepage": "https://github.com/sirjasongo/atk4auth/",
+    "time": "2020-02-02",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jason Go",
+            "email": "jasongo@sparkresearch.net",
+            "homepage": "https://github.com/sirjasongo/atk4auth/",
+            "role": "Developer"
+        }
+     ],
+    "support": {
+        "email": "jasongo@sparkresearch.net",
+        "issues": "https://github.com/sirjasongo/atk4auth/issues",
+        "docs": "https://github.com/sirjasongo/atk4auth/wiki"
+    },
+   "require": {
+     "php": ">=7.2.0",
+    "atk4/ui": "dev-develop",
+    "atk4/data": "dev-develop",
+    "atk4/schema": "dev-develop",
+    "hybridauth/hybridauth" : "~3.0"
+  },
+
+    "autoload": {
+        "psr-4": {
+            "atk4auth\\": "src"
+        }
+    }
+}
