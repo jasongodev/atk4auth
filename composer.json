@@ -28,7 +28,7 @@
 
     "autoload": {
         "psr-4": {
-            "atk4auth\\": "src"
+            "sirjasongo\\atk4auth\\": "src/"
         }
     }
 }
