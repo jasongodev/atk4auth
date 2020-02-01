@@ -22,7 +22,7 @@
    "require": {
      "php": ">=7.2.0",
     "atk4/ui": ">=1.7.1",
-    "atk4/data": ">=1.4",,
+    "atk4/data": ">=1.4",
     "hybridauth/hybridauth" : "~3.0"
   },
 
