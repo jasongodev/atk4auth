@@ -13,7 +13,6 @@ class Authenticate
     use \atk4\core\InitializerTrait {
         init as _init;
 	}
-	
     private $config = null;
     private $user = null;
     public $default_config = [];
