@@ -28,9 +28,11 @@ class Authenticate
         'social_logins' => [],
         'user_id_field' => 'id',
         'user_password_field' => 'password',
-        'user_password_encryption' => 'SHA1',
+        'user_password_encryption' => PASSWORD_DEFAULT,
         'user_email_field' => 'email',
-        'social_logins' => []
+        'user_enable_2fa_field' => 'enable_2fa',
+        'social_logins' => [],
+        'enable_2fa' => 0, // 0=Disable, 1=Optional, 2=Mandatory
     ];
     public $auth_user = null;
     public $slug = null;
@@ -59,7 +61,7 @@ class Authenticate
         
         if (!empty($_SESSION['auth_user_id'])) {
             $this->user->load($_SESSION['auth_user_id']);
-            if ($this->config['enforce_2fa'] or ($this->user['enable_2fa'] and $this->config['enable_2fa'])) {
+            if ($this->config['enable_2fa']==2 or ($this->user[$this->config['user_enable_2fa_field']] and $this->config['enable_2fa']==1)) {
                 if (empty($_SESSION['auth_user_2fa'])) {
                     $ga = new \PHPGangsta_GoogleAuthenticator();
                     $ga_secret = 'VE2E3TSCDEKIIA5G'; //$this->user['totp_secret']; //$ga->createSecret();
@@ -130,10 +132,21 @@ class Authenticate
                 $b_pop->add('View')->set('Type your user email to receive an email link.');
                 $b_pop->add(['Button', 'Login via Email Link', 'red fluid']);
 
-                $form->onSubmit(function ($form) {
-                    $this->user->loadBy($this->config['user_email_field'], $form->model['email']);
-                    $this->user->get();
-                    return new \atk4\ui\jsNotify($this->user['name']);
+                $form->onSubmit(function ($form) use ($auth_app) {
+                    $this->user->tryLoadBy($this->config['user_email_field'], $form->model['email']);
+                    
+                    if ($this->user->loaded()) {
+                        //if ($this->user->compare($this->config['user_password_field'], $form->model['password'])) {
+                        if (password_verify($form->model['password'], $this->user[$this->config['user_password_field']])) {
+                            $_SESSION['auth_user_id'] = $this->user[$this->config['user_id_field']];
+                            $auth_app->jsRedirect($this->config['base_url']);
+                        }
+                        return (new \atk4\ui\jsNotify($this->user[$this->config['user_password_field']]))->setColor('red');
+                    }
+                    else
+                    {
+                        return (new \atk4\ui\jsNotify('Invalid Login'))->setColor('red');
+                    }
                 });
             }
             else if ($this->slug==$this->config['login_slug'] and in_array($this->method, $this->config['social_logins']))
