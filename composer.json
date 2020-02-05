@@ -29,6 +29,7 @@
         "hybridauth/hybridauth": "~3.0",
         "phpgangsta/googleauthenticator": "dev-master",
         "swiftmailer/swiftmailer": "^6.2"
+        
     },
     "autoload": {
         "psr-4": {
