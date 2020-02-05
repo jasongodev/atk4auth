@@ -24,8 +24,7 @@
     },
     "require": {
         "php": ">=7.0.0",
-        "atk4/ui": ">=1.7.1",
-        "atk4/data": ">=1.4",
+        "atk4/ui": ">=2.0",
         "hybridauth/hybridauth": "~3.0",
         "phpgangsta/googleauthenticator": "dev-master",
         "swiftmailer/swiftmailer": "^6.2"
