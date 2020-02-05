@@ -20,30 +20,7 @@ class Authenticate
     public $config = null;
     public $user = null;
     public $default_config = [
-        'pretty_links' => true,
-        'base_url' => '',
-        'get_auth' => 'auth',
-        'get_method' => 'method',
-        'get_redirect' => 'redirect',
-        'login_slug' => 'login',
-        'logout_slug' => 'logout',
-        'register_slug' => 'register',
-        'passwordless_slug' => 'link',
-        '2fa_slug' => '2fa',
-        'template' => __DIR__ . '/../template/narrow.html',
-        'user_id_field' => 'id',
-        'user_password_field' => 'password',
-        'user_password_encryption' => PASSWORD_DEFAULT,
-        'user_email_field' => 'email',
-        'user_enable_2fa_field' => 'enable_2fa',
-        'enable_2fa' => 2, // 0=Disable, 1=Optional, 2=Mandatory
 
-        //Providers specifics
-        'providers' => [
-            'Google'   => ['enabled' => true, 'keys' => [ 'id'  => '939432130054-j1qlru36qjjqnhr7pcvpr7bsvt2f7cac.apps.googleusercontent.com', 'secret' => 'j5FBCCEtruFaisE2ImXBfjhR']],
-            'Discord'   => ['enabled' => true, 'keys' => [ 'id'  => '674366217842196500', 'secret' => 'JF3v87lwo-IHozOAcM0KAgYNzZZOKvOq']],
-            'Facebook' => ['enabled' => true, 'keys' => [ 'id'  => '548506092419505', 'secret' => '70644d05950262d932f7a2329845ffb9']],
-        ]
     ];
     public $auth_user = null;
     public $slug = null;
@@ -187,6 +164,7 @@ class Authenticate
         $form->buttonSave->addClass('large fluid green');
         $form->buttonSave->iconRight = 'right arrow';
         $form->addField('email', null, ['required' => true]);
+        $form->addField('g-recaptcha-response', ['Hidden']);
         $p = $form->addField('password', ['Password'], ['required' => true]);
         $reset_button = $p->addAction(['icon' => 'question'])->setAttr('title', 'Forgot your password?');
         $b_pop = $auth_app->add(['Popup', $reset_button, 'minWidth'=>'50%', 'position' => 'bottom left']);
@@ -203,24 +181,33 @@ class Authenticate
         }
 
         $form->onSubmit(function ($form) use (&$auth_app, $target_lock) {
-            if (empty($_SESSION['primary'])) {
-                $this->user->tryLoadBy($this->config['user_email_field'], $form->model['email']);
+            if ($this->validRecaptcha()) {
+                if (empty($_SESSION['primary'])) {
+                    $this->user->tryLoadBy($this->config['user_email_field'], $form->model['email']);
+                } else {
+                    $this->user->tryLoadBy($this->config['user_id_field'], $_SESSION['auth_user_id']);
+                }
+                
+                
+                if ($this->user->loaded() and password_verify($form->model['password'], $this->user[$this->config['user_password_field']])) {
+                    $_SESSION['auth_user_id'] = $this->user[$this->config['user_id_field']];
+                    $_SESSION[$target_lock] = true;
+                    return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', ['https://' . $this->config['base_url'] . ($target_lock!='primary' ?  $this->getRequestURI() : '')]);
+                } else {
+                    return (new \atk4\ui\jsNotify('Invalid credentials.'))
+                            ->setColor('red')
+                            ->setPosition('topCenter')
+                            ->setWidth('50')
+                            ->setTransition('jiggle')
+                            ->setIcon('warning sign');
+                }
             } else {
-                $this->user->tryLoadBy($this->config['user_id_field'], $_SESSION['auth_user_id']);
-            }
-            
-            
-            if ($this->user->loaded() and password_verify($form->model['password'], $this->user[$this->config['user_password_field']])) {
-                $_SESSION['auth_user_id'] = $this->user[$this->config['user_id_field']];
-                $_SESSION[$target_lock] = true;
-                return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', ['https://' . $this->config['base_url'] . ($target_lock!='primary' ?  $this->getRequestURI() : '')]);
-            } else {
-                return (new \atk4\ui\jsNotify('Invalid credentials.'))
-                        ->setColor('red')
-                        ->setPosition('topCenter')
-                        ->setWidth('50')
-                        ->setTransition('jiggle')
-                        ->setIcon('warning sign');
+                return (new \atk4\ui\jsNotify('Invalid Recaptcha.'))
+                ->setColor('red')
+                ->setPosition('topCenter')
+                ->setWidth('50')
+                ->setTransition('jiggle')
+                ->setIcon('warning sign');
             }
         });
 
@@ -241,27 +228,36 @@ class Authenticate
         $form->buttonSave->addClass('large fluid green');
         $form->buttonSave->iconRight = 'right arrow';
         $form->addField('email', null, ['required' => true]);
+        $form->addField('g-recaptcha-response', ['Hidden']);
 
         $form->onSubmit(function ($form) use (&$auth_app, $target_lock) {
-            if (empty($_SESSION['primary'])) {
-                $this->user->tryLoadBy($this->config['user_email_field'], $form->model['email']);
+            if ($this->validRecaptcha()) {
+                if (empty($_SESSION['primary'])) {
+                    $this->user->tryLoadBy($this->config['user_email_field'], $form->model['email']);
+                } else {
+                    $this->user->tryLoadBy($this->config['user_id_field'], $_SESSION['auth_user_id']);
+                }
+            
+            
+                if ($this->user->loaded()) {
+                    $this->mailer($this->user[$this->config['user_email_field']], $this->config['smtp_from'], 'Login Link', "<h1>Login Link</h1><p>Heare's your login link.</p>");
+                    //return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', ['https://' . $this->config['base_url'] . ($target_lock!='primary' ?  $this->getRequestURI() : '')]);
+                }
+
+                return (new \atk4\ui\jsNotify('You will receive the login link to your email if this is registered in our system.'))
+                ->setColor('blue')
+                ->setPosition('topCenter')
+                ->setWidth('50')
+                ->setTransition('jiggle')
+                ->setIcon('info sign');
             } else {
-                $this->user->tryLoadBy($this->config['user_id_field'], $_SESSION['auth_user_id']);
+                return (new \atk4\ui\jsNotify('Invalid Recaptcha.'))
+                ->setColor('red')
+                ->setPosition('topCenter')
+                ->setWidth('50')
+                ->setTransition('jiggle')
+                ->setIcon('warning sign');
             }
-            
-            
-            if ($this->user->loaded()) {
-
-
-                //return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', ['https://' . $this->config['base_url'] . ($target_lock!='primary' ?  $this->getRequestURI() : '')]);
-            }
-
-            return (new \atk4\ui\jsNotify('You will receive the login link to your email if this is registered in our system.'))
-            ->setColor('blue')
-            ->setPosition('topCenter')
-            ->setWidth('50')
-            ->setTransition('jiggle')
-            ->setIcon('info sign');
         });
 
         $auth_app->run();
@@ -293,20 +289,31 @@ class Authenticate
             //$form->add(['template'=>new \atk4\ui\Template('<img src="' . $qrCodeUrl . '" />')]);
 
             $form->addField('code', '2FA Code', ['required' => true]);
+            $form->addField('g-recaptcha-response', ['Hidden']);
+
             $form->buttonSave->set('Verify');
             $form->buttonSave->addClass('large fluid green');
             $form->buttonSave->iconRight = 'right arrow';
             $form->onSubmit(function ($form) use ($ga, $ga_secret, $target_lock) {
-                if ($ga->verifyCode($ga_secret, $form->model['code'], 2)) {
-                    $_SESSION[$target_lock] = true;
-                    return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', ['https://' . $this->config['base_url'] . ($target_lock!='primary_2fa' ?  $this->getRequestURI() : '')]);
-                } else {
-                    return (new \atk4\ui\jsNotify('Invalid Code'))->setColor('red')
+                if ($this->validRecaptcha()) {
+                    if ($ga->verifyCode($ga_secret, $form->model['code'], 2)) {
+                        $_SESSION[$target_lock] = true;
+                        return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', ['https://' . $this->config['base_url'] . ($target_lock!='primary_2fa' ?  $this->getRequestURI() : '')]);
+                    } else {
+                        return (new \atk4\ui\jsNotify('Invalid Code'))->setColor('red')
                             ->setColor('red')
                             ->setPosition('topCenter')
                             ->setWidth('50')
                             ->setTransition('jiggle')
                             ->setIcon('warning sign');
+                    }
+                } else {
+                    return (new \atk4\ui\jsNotify('Invalid Recaptcha.'))
+                    ->setColor('red')
+                    ->setPosition('topCenter')
+                    ->setWidth('50')
+                    ->setTransition('jiggle')
+                    ->setIcon('warning sign');
                 }
             });
             $auth_app->run();
@@ -367,12 +374,39 @@ class Authenticate
         // Load the page template. Can be overriden by $this->config['template'].
         $auth_app->initLayout(new \atk4\ui\View(['defaultTemplate' => $this->config['template']]));
 
+        if ($this->config['grecaptcha_enable']) {
+            $auth_app->requireJS("https://www.google.com/recaptcha/api.js?render=" . $this->config['grecaptcha_site_key']);
+            $auth_app->add(['template'=>new \atk4\ui\Template("<script>grecaptcha.ready(function(){grecaptcha.execute('" . $this->config['grecaptcha_site_key'] . "',{action:'" . $this->slug . "'}).then(function(token) {\$('input[name=g-recaptcha-response]').val(token);});});</script><style>.grecaptcha-badge{visibility:hidden !important;}</style>")]);
+        }
+        
         // Super important!
         // atk4/ui callbacks do not know the authentication step or method for non-pretty links.
         // Without these, the callbacks will slip through the if-then-else filter below, never to be executed.
         $auth_app->stickyGet($this->config['get_auth']);
         $auth_app->stickyGet($this->config['get_method']);
         $auth_app->stickyGet($this->config['get_redirect']);
+    }
+
+    private function validRecaptcha()
+    {
+        $postdata = http_build_query(
+            array(
+                'secret' => $this->config['grecaptcha_secret_key'],
+                'response' => $_POST['g-recaptcha-response']
+            )
+        );
+        
+        $opts = array('http' =>
+            array(
+                'method'  => 'POST',
+                'header'  => 'Content-Type: application/x-www-form-urlencoded',
+                'content' => $postdata
+            )
+        );
+        
+        $context  = stream_context_create($opts);
+        
+        return json_decode(file_get_contents('https://www.google.com/recaptcha/api/siteverify', false, $context))->success;
     }
 
     /**
@@ -407,5 +441,22 @@ class Authenticate
         $request_uri = explode('?', $request_uri, 2);
  
         return $request_uri[0];
+    }
+
+    private function mailer($to, $from, $subject, $msg)
+    {
+        $transport = (new \Swift_SmtpTransport($this->config['smtp_host'], $this->config['smtp_port']))
+        ->setUsername($this->config['smtp_username'])
+        ->setPassword($this->config['smtp_password']);
+        $mailer = new \Swift_Mailer($transport);
+
+        $message = (new \Swift_Message($subject))
+        ->setFrom($from)
+        ->setTo($to)
+        ->setBody(strip_tags($msg))
+        ->addPart($msg, 'text/html');
+
+        // Send the message
+        $result = $mailer->send($message);
     }
 }
