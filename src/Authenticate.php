@@ -20,7 +20,39 @@ class Authenticate
     public $config = null;
     public $user = null;
     public $default_config = [
+        'pretty_links' => true,
+        'base_url' => '',
+        'get_auth' => 'auth',
+        'get_method' => 'method',
+        'get_redirect' => 'redirect',
+        'login_slug' => 'login',
+        'logout_slug' => 'logout',
+        'register_slug' => 'register',
+        'passwordless_slug' => 'link',
+        '2fa_slug' => '2fa',
+        'template' => __DIR__ . '/../template/narrow.html',
+        'user_table' => 'user',
+        'user_id_field' => 'id',
+        'user_password_field' => 'password',
+        'user_password_encryption' => PASSWORD_DEFAULT,
+        'user_email_field' => 'email',
+        'user_enable_2fa_field' => 'enable_2fa',
+        'enable_2fa' => 2, // 0=Disable, 1=Optional, 2=Mandatory
+        'smtp_host' => '',
+        'smtp_port' => '',
+        'smtp_username' => '',
+        'smtp_from' => '',
+        'smtp_password' => '',
+        'grecaptcha_enable' => false,
+        'grecaptcha_site_key' => '', // Frontent key, included in pages
+        'grecaptcha_secret_key' => '', // Server key, always hidden
 
+        //Providers specifics
+        'providers' => [
+            'Google'   => ['enabled' => true, 'keys' => [ 'id'  => '939432130054-j1qlru36qjjqnhr7pcvpr7bsvt2f7cac.apps.googleusercontent.com', 'secret' => 'j5FBCCEtruFaisE2ImXBfjhR']],
+            'Discord'   => ['enabled' => true, 'keys' => [ 'id'  => '674366217842196500', 'secret' => 'JF3v87lwo-IHozOAcM0KAgYNzZZOKvOq']],
+            'Facebook' => ['enabled' => true, 'keys' => [ 'id'  => '548506092419505', 'secret' => '70644d05950262d932f7a2329845ffb9']],
+        ]
     ];
     public $auth_user = null;
     public $slug = null;
@@ -34,12 +66,20 @@ class Authenticate
      * @param [type] $user
      * @param array $config
      */
-    public function __construct(&$user, $config = [])
+    public function __construct($obj, $config = [])
     {
-        $this->user = $user;
+
         $this->config = empty($config) ? $this->default_config : $config;
         $this->config['base_url'] = empty($this->config['base_url']) ? $_SERVER['SERVER_NAME'] : $this->config['base_url'];
         $this->config['callback'] = 'https://' . $this->config['base_url'] . '/?authcallback';
+        if ($obj instanceof \atk4\data\Model)
+        {
+            $this->user = $obj;
+        }
+        elseif ($obj instanceof \atk4\data\Persistence)
+        {
+            $this->user = new \Model\User($obj, ['table'=>'user', 'config' => $this->config]);
+        }
     }
     
     /**
@@ -105,7 +145,7 @@ class Authenticate
         if (!empty($_SESSION['auth_user_id'])) {
             $this->user->load($_SESSION['auth_user_id']);
             $this->auth_user = clone $this->user;
-            $this->user->unload();
+            //$this->user->unload();
             $this->loginBy2FA('primary_2fa');
         } else {
 
@@ -134,8 +174,8 @@ class Authenticate
             } elseif (isset($_GET['__atk_reload']) or isset($_GET['__atk_callback'])) {
                 // The only code that works!
                 $this->app->add(['template'=>new \atk4\ui\Template('<style>body{display: none !important;}</style><script>document.location = "' . $this->getAuthURI('login') . '";</script>')]);
+                $this->app->catch_runaway_callbacks = false;
                 $this->app->run();
-            
             // Catches any url that needs authentication.
             } else {
                 $this->app->redirect($this->getAuthURI('login'));
@@ -177,7 +217,9 @@ class Authenticate
             $social_col = $auth_app->add(new \atk4\ui\Columns(['width'=>2]))->addClass('center aligned stackable');
             $social_col->addColumn()->add(['Button', 'Facebook', 'facebook large fluid', 'icon'=>'facebook'])->link($this->getAuthURI('login', 'Facebook'));
             $social_col->addColumn()->add(['Button', 'Google', 'google large fluid red', 'icon'=>'google'])->link($this->getAuthURI('login', 'Google'));
-            $social_col->addColumn()->add(['Button', 'Discord', 'discord large fluid dark blue', 'icon'=>'discord'])->link($this->getAuthURI('login', 'Discord'));
+            $social_col->addColumn()->add(['Button', 'Discord', 'discord large fluid violet', 'icon'=>'discord'])->link($this->getAuthURI('login', 'Discord'));
+            $social_col->addColumn()->add(['Button', 'GitLab', 'large fluid orange', 'icon'=>'gitlab'])->link($this->getAuthURI('login', 'Amazon'));
+
         }
 
         $form->onSubmit(function ($form) use (&$auth_app, $target_lock) {
@@ -276,9 +318,9 @@ class Authenticate
             return true;
         }
 
-        if ($this->config['enable_2fa']==2 or ($this->auth_user[$this->config['user_enable_2fa_field']] and $this->config['enable_2fa']==1)) {
+        if ($this->config['enable_2fa']==2 or ($this->user[$this->config['user_enable_2fa_field']] and $this->config['enable_2fa']==1)) {
             $ga = new \PHPGangsta_GoogleAuthenticator();
-            $ga_secret = $this->auth_user['totp_secret'];
+            $ga_secret = $this->user['totp_secret'];
 
             // Create a new atk4/ui app for the 2FA form.
             $auth_app = null;
