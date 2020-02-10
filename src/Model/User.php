@@ -3,7 +3,7 @@ namespace sirjasongo\atk4auth\Model;
 
 class User extends \atk4\data\Model
 {
-    use \sirjasongo\atk4auth\Traits\ManyToMany;
+    use \sirjasongo\atk4m2m\ManyToMany;
     public $table = 'users';
     const our_field = 'id';
     const their_field = ['user_id', Assignments::class=>'user_id'];

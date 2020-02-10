@@ -1,9 +1,8 @@
 <?php
 namespace sirjasongo\atk4auth\Model;
-use sirjasongo\atk4auth\Traits\ManyToMany;
 
 class Grants extends \atk4\data\Model {
-    use ManyToMany;
+    use \sirjasongo\atk4m2m\ManyToMany;
     public $table = 'grants';
 
     public function init()

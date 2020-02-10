@@ -4,7 +4,7 @@ namespace sirjasongo\atk4auth;
 /**
  * Undocumented class
  */
-class Authenticate
+class Authentication
 {
     use \atk4\core\SessionTrait;
     use \atk4\core\ContainerTrait;

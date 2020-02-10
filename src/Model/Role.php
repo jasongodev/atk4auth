@@ -2,7 +2,7 @@
 namespace sirjasongo\atk4auth\Model;
 
 class Role extends \atk4\data\Model {
-    use \sirjasongo\atk4auth\Traits\ManyToMany;
+    use \sirjasongo\atk4m2m\ManyToMany;
     public $table = 'roles';
     const our_field = 'id';
     const their_field = 'role_id';
