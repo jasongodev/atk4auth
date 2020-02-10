@@ -4,7 +4,9 @@
     "type": "library",
     "keywords": [
         "atk4",
-        "hybridauth"
+        "hybridauth",
+        "authentication",
+        "login"
     ],
     "homepage": "https://github.com/sirjasongo/atk4auth/",
     "time": "2020-02-02",
