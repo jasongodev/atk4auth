@@ -6,13 +6,7 @@ namespace sirjasongo\atk4auth;
  */
 class Authentication
 {
-    use \atk4\core\SessionTrait;
-    use \atk4\core\ContainerTrait;
-    use \atk4\core\FactoryTrait;
     use \atk4\core\AppScopeTrait;
-    use \atk4\core\DIContainerTrait;
-    use \atk4\core\TrackableTrait;
-    use \atk4\core\HookTrait;
     use \atk4\core\InitializerTrait {
         init as _init;
     }

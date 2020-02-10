@@ -1,8 +1,10 @@
 <?php
 namespace sirjasongo\atk4auth\Model;
 
-class Permission extends \atk4\data\Model {
+class Permission extends \atk4\data\Model
+{
     use \sirjasongo\atk4m2m\ManyToMany;
+    
     public $table = 'permissions';
     const our_field = 'id';
     const their_field = 'perm_id';
@@ -17,7 +19,6 @@ class Permission extends \atk4\data\Model {
 
         $this->hasManyToMany(Role::class, Grants::class, 'name');
     }
-    
 }
 
 ?>
