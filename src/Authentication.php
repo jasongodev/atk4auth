@@ -63,8 +63,8 @@ class Authentication
     public function __construct($obj, $config = [])
     {
         $this->config = empty($config) ? $this->default_config : $config;
-        $this->config['base_url'] = empty($this->config['base_url']) ? $_SERVER['SERVER_NAME'] : $this->config['base_url'];
-        $this->config['callback'] = 'https://' . $this->config['base_url'] . '/?authcallback';
+        $this->config['base_url'] = 'https://' . (empty($this->config['base_url']) ? $_SERVER['SERVER_NAME'] : $this->config['base_url']);
+        $this->config['callback'] = $this->config['base_url'] . '/?authcallback';
         if ($obj instanceof \atk4\data\Model) {
             $this->user = $obj;
         } elseif ($obj instanceof \atk4\data\Persistence) {
@@ -102,6 +102,7 @@ class Authentication
         // Any mention of logout will instantly logout the user.
         if ($this->slug==$this->config['logout_slug']) {
             $_SESSION = [];
+            $this->app->redirect($this->getAuthURI('login'));
         }
 
         // Callbacks from third party providers will be processed regardless of login status.
@@ -127,7 +128,6 @@ class Authentication
                     $auth_app = null;
                     $this->initializeTemplate($auth_app, 'Login');
                     $auth_app->add('Header')->set('Your login via ' . $_SESSION['auth_current_method'] . ' failed.')->addClass('center aligned');
-                    ;
                     $auth_app->add('Button', ['Try Again', 'red fluid'])->link($_SESSION['auth_redirect']);
                     unset($_SESSION['HYBRIDAUTH::STORAGE']);
                     exit;
@@ -142,9 +142,6 @@ class Authentication
         // Check if the user is logged in. $_SESSION['auth_user_id'] contains the user id of the logged user.
         if (!empty($_SESSION['auth_user_id'])) {
             $this->user->load($_SESSION['auth_user_id']);
-        //$this->auth_user = clone $this->user;
-            //$this->user->unload();
-            //$this->loginBy2FA('primary_2fa');
         } else {
 
             // Maybe this will be handy in the future. Hooks can access this object properties via $app->auth.
@@ -171,6 +168,7 @@ class Authentication
                 $this->app->add(['template'=>new \atk4\ui\Template('<style>body{display: none !important;}</style><script>document.location = "' . $this->getAuthURI('login') . '";</script>')]);
                 $this->app->catch_runaway_callbacks = false;
                 $this->app->run();
+                exit;
             }
         }
     }
@@ -186,9 +184,16 @@ class Authentication
         if (!empty($_SESSION['auth_session'][$target_lock])) {
             return true;
         }
-        $auth_app = null;
+
+        if ($this->slug!='login' and $target_lock=='primary' and empty($_SESSION['auth_session']['primary']))
+        {
+            $this->app->redirect($this->getAuthURI('login'));
+        }
+
         // Create a new atk4/ui app for the login form.
+        $auth_app = null;
         $this->initializeTemplate($auth_app, 'Login');
+
         $form = $auth_app->add('Form');
         $form->buttonSave->set('Sign in');
         $form->buttonSave->addClass('large fluid green');
@@ -219,11 +224,10 @@ class Authentication
                     $this->user->tryLoadBy($this->config['user_id_field'], $_SESSION['auth_user_id']);
                 }
                 
-                
                 if ($this->user->loaded() and password_verify($form->model['password'], $this->user[$this->config['user_password_field']])) {
                     $_SESSION['auth_user_id'] = $this->user[$this->config['user_id_field']];
                     $_SESSION['auth_session'][$target_lock] = true;
-                    return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', ['https://' . $this->config['base_url'] . ($target_lock!='primary' ?  $this->getRequestURI() : '')]);
+                    return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', [$this->config['base_url'] . ($target_lock!='primary' ?  $this->getRequestURI() : '')]);
                 } else {
                     return (new \atk4\ui\jsNotify('Invalid credentials.'))
                             ->setColor('red')
@@ -251,9 +255,10 @@ class Authentication
         if (!empty($_SESSION['auth_session'][$target_lock])) {
             return true;
         }
+
         $auth_app = null;
-        // Create a new atk4/ui app for the login form.
         $this->initializeTemplate($auth_app, 'Login By Link');
+
         $form = $auth_app->add('Form');
         $form->buttonSave->set('Send Link to Email');
         $form->buttonSave->addClass('large fluid green');
@@ -272,7 +277,6 @@ class Authentication
             
                 if ($this->user->loaded()) {
                     $this->mailer($this->user[$this->config['user_email_field']], $this->config['smtp_from'], 'Login Link', "<h1>Login Link</h1><p>Heare's your login link.</p>");
-                    //return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', ['https://' . $this->config['base_url'] . ($target_lock!='primary' ?  $this->getRequestURI() : '')]);
                 }
 
                 return (new \atk4\ui\jsNotify('You will receive the login link to your email if this is registered in our system.'))
@@ -301,7 +305,7 @@ class Authentication
      * @param [type] $target_lock
      * @return void
      */
-    public function loginBy2FA($target_lock)
+    public function loginBy2FA($target_lock='primary_2fa')
     {
         if (!empty($_SESSION['auth_session'][$target_lock])) {
             return true;
@@ -321,15 +325,15 @@ class Authentication
 
             $form->addField('code', '2FA Code', ['required' => true]);
             $form->addField('g-recaptcha-response', ['Hidden']);
-
             $form->buttonSave->set('Verify');
             $form->buttonSave->addClass('large fluid green');
             $form->buttonSave->iconRight = 'right arrow';
+
             $form->onSubmit(function ($form) use ($ga, $ga_secret, $target_lock) {
                 if ($this->validRecaptcha()) {
                     if ($ga->verifyCode($ga_secret, $form->model['code'], 2)) {
                         $_SESSION['auth_session'][$target_lock] = true;
-                        return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', ['https://' . $this->config['base_url'] . ($target_lock!='primary_2fa' ?  $this->getRequestURI() : '')]);
+                        return new \atk4\ui\jsExpression('$(".ui, div").hide();document.location = []', [$this->config['base_url'] . ($target_lock!='primary_2fa' ?  $this->getRequestURI() : '')]);
                     } else {
                         return (new \atk4\ui\jsNotify('Invalid Code'))->setColor('red')
                             ->setColor('red')
@@ -363,12 +367,11 @@ class Authentication
         // so that when the callback is triggered, we can redirect the user to the appropriate pages.
         // Note that we can't attach any url redirect to the callback url because third party providers
         // usually need a constant callback url.
-        $_SESSION['auth_redirect'] = $this->getRequestURI();
+        $_SESSION['auth_redirect'] = $this->config['base_url'] . $this->getRequestURI();
         $_SESSION['auth_current_target'] = $target_lock;
 
         $this->initializeTemplate($auth_app, 'Login');
         $auth_app->add('Header')->set('Login via ' . $method . ' is needed to proceed.')->addClass('center aligned');
-        ;
         $auth_app->add('Button', ['Proceed', 'green fluid'])->link($this->getAuthURI('relogin', $method));
         exit;
     }
@@ -388,7 +391,7 @@ class Authentication
 
         $_SESSION['auth_current_method'] = $method;
         $_SESSION['auth_current_target'] = $target_lock;
-        $_SESSION['auth_redirect'] = $target_lock=='primary' ? $this->getAuthURI('login', $method) : $_SESSION['auth_redirect'];
+        $_SESSION['auth_redirect'] = $target_lock=='primary' ? $this->config['base_url'] : $_SESSION['auth_redirect'];
 
         try {
             $hybridauth = new \Hybridauth\Hybridauth($this->config);
@@ -427,7 +430,7 @@ class Authentication
 
         if ($this->config['grecaptcha_enable']) {
             $auth_app->requireJS("https://www.google.com/recaptcha/api.js?render=" . $this->config['grecaptcha_site_key']);
-            $auth_app->add(['template'=>new \atk4\ui\Template("<script>grecaptcha.ready(function(){grecaptcha.execute('" . $this->config['grecaptcha_site_key'] . "',{action:'" . $this->slug . "'}).then(function(token) {\$('input[name=g-recaptcha-response]').val(token);});});</script><style>.grecaptcha-badge{visibility:hidden !important;}</style>")]);
+            $auth_app->add(['template'=>new \atk4\ui\Template("<script>grecaptcha.ready(function(){grecaptcha.execute('" . $this->config['grecaptcha_site_key'] . "',{action:'" . str_replace('.', '', $this->slug) . "'}).then(function(token) {\$('input[name=g-recaptcha-response]').val(token);});});</script><style>.grecaptcha-badge{visibility:hidden !important;}</style>")]);
         }
         
         // Super important!
@@ -469,7 +472,7 @@ class Authentication
      */
     public function getAuthURI($slug, $method = '')
     {
-        return 'https://' . $this->config['base_url'] . ($this->config['pretty_links'] ? '/' . $slug . '/' . $method : '?' . $this->config['get_auth'] . '=' . $slug . '&' . $this->config['get_method'] . '=' . $method);
+        return $this->config['base_url'] . ($this->config['pretty_links'] ? '/' . $slug . '/' . $method : '?' . $this->config['get_auth'] . '=' . $slug . '&' . $this->config['get_method'] . '=' . $method);
     }
 
     /**
