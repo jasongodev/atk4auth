@@ -43,9 +43,9 @@ class Authentication
 
         //Providers specifics
         'providers' => [
-            'Google'   => ['enabled' => true, 'keys' => [ 'id'  => '939432130054-j1qlru36qjjqnhr7pcvpr7bsvt2f7cac.apps.googleusercontent.com', 'secret' => 'j5FBCCEtruFaisE2ImXBfjhR']],
-            'Discord'   => ['enabled' => true, 'keys' => [ 'id'  => '674366217842196500', 'secret' => 'JF3v87lwo-IHozOAcM0KAgYNzZZOKvOq']],
-            'Facebook' => ['enabled' => true, 'keys' => [ 'id'  => '548506092419505', 'secret' => '70644d05950262d932f7a2329845ffb9']],
+            'Google'   => ['enabled' => true, 'keys' => [ 'id'  => '', 'secret' => '']],
+            'Discord'   => ['enabled' => true, 'keys' => [ 'id'  => '', 'secret' => '']],
+            'Facebook' => ['enabled' => true, 'keys' => [ 'id'  => '', 'secret' => '']],
         ]
     ];
     public $auth_user = null;
@@ -179,7 +179,7 @@ class Authentication
      * @param [type] $target_lock
      * @return void
      */
-    public function loginByPassword($target_lock='primary')
+    public function loginByPassword($target_lock='primary', $display='window')
     {
         if (!empty($_SESSION['auth_session'][$target_lock])) {
             return true;
@@ -192,13 +192,18 @@ class Authentication
 
         // Create a new atk4/ui app for the login form.
         $auth_app = null;
-        $this->initializeTemplate($auth_app, 'Login');
+        $this->initializeTemplate($auth_app, 'Login', $display);
 
         $form = $auth_app->add('Form');
         $form->buttonSave->set('Sign in');
         $form->buttonSave->addClass('large fluid green');
         $form->buttonSave->iconRight = 'right arrow';
-        $form->addField('email', null, ['required' => true]);
+        
+        if (empty($_SESSION['auth_session']['primary']))
+        {
+            $form->addField('email', null, ['required' => true]);
+        }
+        
         $form->addField('g-recaptcha-response', ['Hidden']);
         $p = $form->addField('password', ['Password'], ['required' => true]);
         $reset_button = $p->addAction(['icon' => 'question'])->setAttr('title', 'Forgot your password?');
@@ -305,7 +310,7 @@ class Authentication
      * @param [type] $target_lock
      * @return void
      */
-    public function loginBy2FA($target_lock='primary_2fa')
+    public function loginBy2FA($target_lock='primary_2fa', $display='window')
     {
         if (!empty($_SESSION['auth_session'][$target_lock])) {
             return true;
@@ -317,7 +322,7 @@ class Authentication
 
             // Create a new atk4/ui app for the 2FA form.
             $auth_app = null;
-            $this->initializeTemplate($auth_app, '2FA');
+            $this->initializeTemplate($auth_app, '2FA', $display);
 
             $form = $auth_app->add('Form');
             //$qrCodeUrl = $ga->getQRCodeGoogleUrl($this->app->title, $ga_secret);
@@ -369,7 +374,10 @@ class Authentication
         // usually need a constant callback url.
         $_SESSION['auth_redirect'] = $this->config['base_url'] . $this->getRequestURI();
         $_SESSION['auth_current_target'] = $target_lock;
-
+        $a = $this->app->add(new \atk4\ui\View(['defaultTemplate' => $this->config['template']]));
+        $a->add('Header')->set('Login via ' . $method . ' is needed to proceed.')->addClass('center aligned');
+        $a->add('Button', ['Proceed', 'green fluid'])->link($this->getAuthURI('relogin', $method));
+exit;
         $this->initializeTemplate($auth_app, 'Login');
         $auth_app->add('Header')->set('Login via ' . $method . ' is needed to proceed.')->addClass('center aligned');
         $auth_app->add('Button', ['Proceed', 'green fluid'])->link($this->getAuthURI('relogin', $method));
@@ -417,22 +425,29 @@ class Authentication
      * @param string $title
      * @return void
      */
-    private function initializeTemplate(&$auth_app, $title = 'Authentication')
+    private function initializeTemplate(&$auth_app, $title = 'Authentication', $display='window')
     {
-        // Create a new atk4/ui app for the login or registration form.
-        $auth_app = new \atk4\ui\App($title . ' - ' . $this->app->title);
-        $this->app->catch_runaway_callbacks = false;
-        $this->app->run_called = true;
-        $auth_app->catch_runaway_callbacks = false;
+        if ($display=='window')
+        {
+            // Create a new atk4/ui app for the login or registration form.
+            $auth_app = new \atk4\ui\App($title . ' - ' . $this->app->title); 
+            $this->app->catch_runaway_callbacks = false;
+            $this->app->run_called = true;
+            $auth_app->catch_runaway_callbacks = false;
 
-        // Load the page template. Can be overriden by $this->config['template'].
-        $auth_app->initLayout(new \atk4\ui\View(['defaultTemplate' => $this->config['template']]));
+            // Load the page template. Can be overriden by $this->config['template'].
+            $auth_app->initLayout(new \atk4\ui\View(['defaultTemplate' => $this->config['template']]));
+        }
+        else
+        {
+            $auth_app = $this->app;
+        }
 
         if ($this->config['grecaptcha_enable']) {
             $auth_app->requireJS("https://www.google.com/recaptcha/api.js?render=" . $this->config['grecaptcha_site_key']);
             $auth_app->add(['template'=>new \atk4\ui\Template("<script>grecaptcha.ready(function(){grecaptcha.execute('" . $this->config['grecaptcha_site_key'] . "',{action:'" . str_replace('.', '', $this->slug) . "'}).then(function(token) {\$('input[name=g-recaptcha-response]').val(token);});});</script><style>.grecaptcha-badge{visibility:hidden !important;}</style>")]);
         }
-        
+
         // Super important!
         // atk4/ui callbacks do not know the authentication step or method for non-pretty links.
         // Without these, the callbacks will slip through the if-then-else filter below, never to be executed.
