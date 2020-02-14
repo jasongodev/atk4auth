@@ -48,7 +48,7 @@ To implement a login by third party authentication ONLY (e.g. Facebook or Google
 $app->auth->loginByProvider();
 ```
 The providers that will be shown will be based on the enabled providers in the $config array that you will pass during initialization of Authentication class. By default there are no third party providers enabled.
-
+### Adding 2-Factor Authentication
 To implement a 2-factor authentication, add the following code:
 ```php
 $app->auth->loginBy2FA();
