@@ -21,10 +21,19 @@ Atk4auth provides user authentication features to atk4/ui.
 soon…
 ## Installation
 `composer require sirjasongo/atk4auth`
-## Basic Usage
-Initialize the Authentication class by adding it into the atk4/ui App object.
-You can either pass a user model of your own or pass a persistence model and let the Authentication class spawn a user model.
+## Basic Usage for Primary Session
+Initialize the Authentication class by adding it into the atk4/ui App object. You can either pass a user model of your own or pass a persistence model and let the Authentication class spawn a user model.
 ```php
 $app = new \atk4\ui\App('My App');
+$user = new User();
 $app->add(new Authentication($user));
 ```
+To implement a login by password on a page, place the following code:
+```php
+$app->auth->loginByPassword();
+```
+To implement a 2-factor authentication, add the following code:
+```php
+$app->auth->loginBy2FA();
+```
+Note that loginBy2FA() requires a primary logged session. Therefore, you can only use it after authenticating via loginByPassword() or loginByProvider().
