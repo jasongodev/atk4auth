@@ -17,3 +17,14 @@ Atk4auth provides user authentication features to atk4/ui.
 - Support for pretty links.
 - Ability to create custom templates for login forms.
 - Everything configurable, see config.php.
+## Demo
+soon…
+## Installation
+`composer require sirjasongo/atk4auth`
+## Basic Usage
+Initialize the Authentication class by adding it into the atk4/ui App object.
+You can either pass a user model of your own or pass a persistence model and let the Authentication class spawn a user model.
+```php
+$app = new \atk4\ui\App('My App');
+$app->add(new Authentication($user));
+```
