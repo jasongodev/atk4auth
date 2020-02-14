@@ -69,10 +69,14 @@ $app->loginByPassword(__FILE__, 'window'); // Same as above
 
 $app->loginByPassword(__FILE__, 'page'); // Shows a password form within the page.
 ```
-The __FILE__  is a keyword that atk4auth will remember when a user successfully re-authenticate. The next time atk4auth encounters editprofile.php, it will check if this was re-authenticated already. If yes, it will just skip the re-authentication and proceed with the rest of your code. If not, then it will show the password form again.
+The `__FILE__`  is a keyword that atk4auth will remember when a user successfully re-authenticate. The next time atk4auth encounters editprofile.php, it will check if this was re-authenticated already. If yes, it will just skip the re-authentication and proceed with the rest of your code. If not, then it will show the password form again.
+
+Note that loginByPassword() will not show the email field during sudo mode because the user is already logged in and therefore the system knows the email already. Atk4auth just needs the password for verification.
 
 You are free to use any keyword for re-authentication. You can use a keyword based on your own implementation of roles and permissions. Assuming you want to secure users with editor role, the following is useful:
-$app-\>auth-\>loginByPassword('Editor');
+```php
+$app->auth->loginByPassword('Editor');
+```
 It is up to you to set the roles and permissions allowed for a certain page or content. Assuming you have a user permission called “view.logs”, you can implement a sudo mode using this:
 ```php
 $app->auth->loginByPassword('view.logs');
@@ -91,7 +95,7 @@ This versatility is useful for permission-based systems. Imagine 8 pages where r
 $app->auth->loginByPassword('access api keys');
 ```
 
-Lastly, take note that you don’t even need a role-permission system in your project. If you just need to protect certain pages, the __FILE__ magic constant is enough to protect that page. You can also declare whatever keyword to use in re-authentication.
+Lastly, take note that you don’t even need a role-permission system in your project. If you just need to protect certain pages, the `__FILE__` magic constant is enough to protect that page. You can also declare whatever keyword to use in re-authentication.
 #### Sudo Mode using 2-Factor Authentication or Third Party Provider
 Just like the concept above, the re-authentication is also possible via 2FA or even a third party provider of choice:
 ```php
@@ -103,6 +107,16 @@ $app->auth->loginByProvider('access api keys'); // Shows a list of enabled third
 
 $app->auth->loginByProvider('access api keys', 'Facebook'); // Shows Facebook only as a way to re-authenticate
 ```
+#### Do not use `“primary”`and `“primary_2fa”` as keyword
+By default the word `“primary”` and `“primary_2fa”` are used by atk4auth in the first level authentication. So the first login routine:
+```php
+$app->auth->loginByPassword();
+```
+is actually the same with:
+```php
+$app->auth->loginByPassword('primary');
+```
+Same is true with loginBy2FA() which uses `“primary_2fa”` and with loginByProvider which uses `“primary”` as well.
 ## Chaining of Authentication
 You can stack as many authentication routines you want for a page. Consider the usual login routine where a password and 2FA are needed. The following code does that:
 ```php
@@ -133,3 +147,10 @@ Because atk4auth is not aware of the set of roles and permissions of the user mo
 There might be an instance where the above separation of authentication is useful. Assuming a company ties the 2FA OTP generator to a dedicated mobile device only located in the company’s 3-tier secure premises. An admin who accesses the dashboard in a middle of a beer pong party, very drunk, will not be able to use its delete powers despite able to login as an admin because the mobile device that can generate the OTP codes is in the office.
 
 Now imagine a nuclear missile launch that uses atk4/ui and atk4auth codes for their dashboard. Atk4auth’s versatility saves the world.
+## Expiration of Authentication
+## Configuration
+A sample of the $config array is in the config.php. If you implement your own Users model and have assigned custom fields for the fields that atk4auth uses for authentication, you can indicate the custom fields in the configuration.
+
+Perhaps you will spend most of your time configuring the third party provider which needs to have a client key and secret. You may also change the color of the button using the CSS class color. Atk4auth just like atk4/ui uses Fomantic UI for styling.
+
+**Important:** Do not change the primary handle name of the third party provider (e.g. Facebook or Google) because these are directly used by atk4auth in identifying the correct third party endpoints. Do not change it from Facebook to “FB” or “FB Login”. Doing so will break the functionality.
