@@ -39,6 +39,9 @@ $app = new \atk4\ui\App('My App');
 $db = new \atk4\data\Persistence\SQL('mysql://user:password@localhost');
 $app->add(new Authentication($db));
 ```
+This creates a property **auth** inside $app which is an instance of the Authentication class. You can then use this property to call the authentication method of choice.
+Note that instantiating the Authentication class do not automatically show any login forms. You need to call the authentication method specifically.
+#### Authentication Methods
 To implement a login by password on a page, place the following code:
 ```php
 $app->auth->loginByPassword();
