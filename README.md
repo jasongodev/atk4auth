@@ -23,7 +23,9 @@ soon…
 `composer require sirjasongo/atk4auth`
 ## Basic Usage for Primary Session
 Initialize the Authentication class by adding it into the atk4/ui App object.
+
 `new Authentication(<user model or persistence model>, <config array>);`
+
 You can either pass a user model of your own:
 ```php
 $app = new \atk4\ui\App('My App');
