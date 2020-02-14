@@ -48,7 +48,7 @@ To implement a login by third party authentication ONLY (e.g. Facebook or Google
 $app->auth->loginByProvider();
 ```
 The providers that will be shown will be based on the enabled providers in the $config array that you will pass during initialization of Authentication class. By default there are no third party providers enabled.
-### Adding 2-Factor Authentication
+#### Adding 2-Factor Authentication
 To implement a 2-factor authentication, add the following code:
 ```php
 $app->auth->loginBy2FA();
@@ -60,7 +60,7 @@ Note that loginBy2FA() requires a primary logged session. Therefore, you can onl
 Atk4auth can be called to authenticate a specific session, page, permission, and even groups of permissions.
 
 This is useful when you want an extra level of security for certain pages like password reset, showing of API secret keys, or for admin level changes.
-### Use of keywords
+#### Use of keywords
 Assuming you have a page called editprofile.php and you want to re-authenticate people who will edit their profile through this page, you can do this using any of the following code:
 ```php
 $app->loginByPassword(__FILE__); // Shows a password form in the window.
@@ -77,7 +77,7 @@ It is up to you to set the roles and permissions allowed for a certain page or c
 ```php
 $app->auth->loginByPassword('view.logs');
 ```
-### Group Keywords
+#### Group Keywords
 Atk4auth implementation based on customizable keywords allows you to make any keywords applicable to any page you set it, thus implementing a group based re-authentication.
 
 Assuming you have editdomain.php, viewlogs.php, and billings.php that can only be viewed by the role Superadmin. Place this code in each of the three pages:
@@ -92,7 +92,7 @@ $app->auth->loginByPassword('access api keys');
 ```
 
 Lastly, take note that you don’t even need a role-permission system in your project. If you just need to protect certain pages, the __FILE__ magic constant is enough to protect that page. You can also declare whatever keyword to use in re-authentication.
-### Sudo Mode using 2-Factor Authentication or Third Party Provider
+#### Sudo Mode using 2-Factor Authentication or Third Party Provider
 Just like the concept above, the re-authentication is also possible via 2FA or even a third party provider of choice:
 ```php
 $app->auth->loginBy2FA('access api keys'); // Shows 2FA form in a window alone.
