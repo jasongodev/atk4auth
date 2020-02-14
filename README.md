@@ -24,7 +24,7 @@ soon…
 ## Basic Usage for Primary Session
 Initialize the Authentication class by adding it into the atk4/ui App object.
 
-`new Authentication(<user model or persistence model>, <config array>);`
+`new Authentication(<user model or persistence model required>, <config array optional>);`
 
 You can either pass a user model of your own:
 ```php
@@ -43,6 +43,12 @@ To implement a login by password on a page, place the following code:
 ```php
 $app->auth->loginByPassword();
 ```
+To implement a login by third party authentication ONLY (e.g. Facebook or Google), use the following:
+```php
+$app->auth->loginByProvider();
+```
+The providers that will be shown will be based on the enabled providers in the $config array that you will pass during initialization of Authentication class. By default there are no third party providers enabled.
+
 To implement a 2-factor authentication, add the following code:
 ```php
 $app->auth->loginBy2FA();
