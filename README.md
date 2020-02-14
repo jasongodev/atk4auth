@@ -147,8 +147,13 @@ Because atk4auth is not aware of the set of roles and permissions of the user mo
 There might be an instance where the above separation of authentication is useful. Assuming a company ties the 2FA OTP generator to a dedicated mobile device only located in the company’s 3-tier secure premises. An admin who accesses the dashboard in a middle of a beer pong party, very drunk, will not be able to use its delete powers despite able to login as an admin because the mobile device that can generate the OTP codes is in the office.
 
 Now imagine a nuclear missile launch that uses atk4/ui and atk4auth codes for their dashboard. Atk4auth’s versatility saves the world.
-## Expiration of Authentication
-## Configuration
+## Expiration of Authentication (not yet implemented)
+You can set the expiration of the primary session and the sudo modes in the configuration. By default, the primary session expires after 1 day while the sudo mode will expire after 15 minutes.
+
+During the primary login, the user can set to remember the session and this will extend the expiration of the primary session to 7 days. Once the expiration has been reached, the user will automatically logout from the primary session including all the sudo modes the user has re-authenticated.
+
+Sudo modes can’t be extended nor changed by the user. The only way to change the duration is though the configuration set by the developer.
+## Configuration (not yet complete)
 A sample of the $config array is in the config.php. If you implement your own Users model and have assigned custom fields for the fields that atk4auth uses for authentication, you can indicate the custom fields in the configuration.
 
 Perhaps you will spend most of your time configuring the third party provider which needs to have a client key and secret. You may also change the color of the button using the CSS class color. Atk4auth just like atk4/ui uses Fomantic UI for styling.
