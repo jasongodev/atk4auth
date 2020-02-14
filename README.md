@@ -56,8 +56,8 @@ $app->auth->loginBy2FA();
 Note that loginBy2FA() requires a primary logged session. Therefore, you can only use it after authenticating via loginByPassword() or loginByProvider().
 
 **Important:** Instruct your users to download Google Authenticator so they can generate a time-based OTP.
-## Session-specific Authentication / Sudo Mode
-Atk4auth can be called to authenticate a specific session, page, permission, and even groups of permissions.
+## Re-Authentication / Sudo Mode
+Atk4auth can be called to re-authenticate a specific page, roles, permission, and even groups of permissions.
 
 This is useful when you want an extra level of security for certain pages like password reset, showing of API secret keys, or for admin level changes.
 #### Use of keywords
