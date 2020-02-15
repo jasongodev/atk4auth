@@ -27,7 +27,7 @@
     "require": {
         "php": ">=7.0.0",
         "atk4/ui": "^2.0",
-        "sirjasongo/atk4m2m": "*",
+        "sirjasongo/atk4acl": "*",
         "hybridauth/hybridauth": "~3.0",
         "phpgangsta/googleauthenticator": "*",
         "swiftmailer/swiftmailer": "^6.2"

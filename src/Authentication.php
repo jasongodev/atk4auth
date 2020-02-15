@@ -43,9 +43,424 @@ class Authentication
 
         //Providers specifics
         'providers' => [
-            'Google'   => ['enabled' => true, 'keys' => [ 'id'  => '', 'secret' => '']],
-            'Discord'   => ['enabled' => true, 'keys' => [ 'id'  => '', 'secret' => '']],
-            'Facebook' => ['enabled' => true, 'keys' => [ 'id'  => '', 'secret' => '']],
+            'AOLOpenID'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'AOLOpenID',
+                'icon' => 'dot circle outline',
+                'color'=>'black'
+            ],
+            
+            'Amazon'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Amazon',
+                'icon' => 'amazon',
+                'color'=>'yellow'
+            ],
+            
+            'Authentiq'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Authentiq',
+                'icon' => 'font',
+                'color'=>'orange'
+            ],
+            
+            'BitBucket'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'BitBucket',
+                'icon' => 'bitbucket',
+                'color'=>'blue'
+            ],
+            
+            'Blizzard'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Blizzard',
+                'icon' => 'bold',
+                'color'=>'blue'
+            ],
+            
+            'BlizzardAPAC'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'BlizzardAPAC',
+                'icon' => 'bold',
+                'color'=>'blue'
+            ],
+            
+            'BlizzardEU'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'BlizzardEU',
+                'icon' => 'bold',
+                'color'=>'blue'
+            ],
+            
+            'Discord'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Discord',
+                'icon' => 'discord',
+                'color'=>'violet'
+            ],
+            
+            'Disqus'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Disqus',
+                'icon' => 'discourse',
+                'color'=>'blue'
+            ],
+            
+            'Dribble'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Dribble',
+                'icon' => 'dribble',
+                'color'=>'pink'
+            ],
+            
+            'Facebook'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Facebook',
+                'icon' => 'facebook',
+                'color'=>'blue'
+            ],
+            
+            'Foursquare'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Foursquare',
+                'icon' => 'foursquare',
+                'color'=>'blue'
+            ],
+            
+            'GitHub'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'GitHub',
+                'icon' => 'github',
+                'color'=>'black'
+            ],
+            
+            'GitLab'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'GitLab',
+                'icon' => 'gitlab',
+                'color'=>'orange'
+            ],
+            
+            'Google'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Google',
+                'icon' => 'google',
+                'color'=>'red'
+            ],
+            
+            'Instagram'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Instagram',
+                'icon' => 'instagram',
+                'color'=>'pink'
+            ],
+            
+            'LinkedIn'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'LinkedIn',
+                'icon' => 'linkedin',
+                'color'=>'blue'
+            ],
+            
+            'Mailru'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Mailru',
+                'icon' => 'envelope',
+                'color'=>'blue'
+            ],
+            
+            'MicrosoftGraph'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'MicrosoftGraph',
+                'icon' => 'microsoft',
+                'color'=>'orange'
+            ],
+            
+            'ORCID'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'ORCID',
+                'icon' => 'id badge',
+                'color'=>'green'
+            ],
+            
+            'Odnoklassniki'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Odnoklassniki',
+                'icon' => 'odnoklassniki',
+                'color'=>'orange'
+            ],
+            
+            'Paypal'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Paypal',
+                'icon' => 'paypal',
+                'color'=>'black'
+            ],
+            
+            'Reddit'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Reddit',
+                'icon' => 'reddit alien',
+                'color'=>'orange'
+            ],
+            
+            'Spotify'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Spotify',
+                'icon' => 'spotify',
+                'color'=>'green'
+            ],
+            
+            'StackExchange'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'StackExchange',
+                'icon' => 'stack exchange',
+                'color'=>'blue'
+            ],
+            
+            'Steam'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Steam',
+                'icon' => 'steam',
+                'color'=>'teal'
+            ],
+            
+            'SteemConnect'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'SteemConnect',
+                'icon' => 'dot circle outline',
+                'color'=>'violet'
+            ],
+            
+            'Telegram'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Telegram',
+                'icon' => 'telegram plane',
+                'color'=>'blue'
+            ],
+            
+            'Tumblr'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Tumblr',
+                'icon' => 'tumblr',
+                'color'=>'blue'
+            ],
+            
+            'TwitchTV'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'TwitchTV',
+                'icon' => 'twitch',
+                'color'=>'violet'
+            ],
+            
+            'Twitter'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Twitter',
+                'icon' => 'twitter',
+                'color'=>'blue'
+            ],
+            
+            'Vkontakte'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Vkontakte',
+                'icon' => 'vk',
+                'color'=>'blue'
+            ],
+            
+            'WeChat'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'WeChat',
+                'icon' => 'wechat',
+                'color'=>'green'
+            ],
+            
+            'WeChatChina'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'WeChatChina',
+                'icon' => 'wechat',
+                'color'=>'green'
+            ],
+            
+            'WindowsLive'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'WindowsLive',
+                'icon' => 'windows',
+                'color'=>'blue'
+            ],
+            
+            'Wordpress'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Wordpress',
+                'icon' => 'wordpress',
+                'color'=>'black'
+            ],
+            
+            'Yahoo'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Yahoo',
+                'icon' => 'yahoo',
+                'color'=>'violet'
+            ],
+            
+            'Yandex'   => [
+                'enabled' => false,
+                'keys' => [
+                    'id'  => '',
+                    'secret' => ''
+                ],
+                'name' => 'Yandex',
+                'icon' => 'yandex international',
+                'color'=>'red'
+            ],
+            
         ]
     ];
     public $auth_user = null;
