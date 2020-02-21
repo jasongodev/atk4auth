@@ -7,7 +7,7 @@ $config = [
     // 0 = (Default) Disable site-wide 2FA regardless of users settings
     // 1 = Let the user set 2FA settings. Disabled by default.
     // 2 = Mandatory 2FA. Users can not disable 2FA.
-    'enable_2fa' => 0,
+    '2fa_enabled' => 0,
 
     // The users table name
     'user_table' => 'user',
@@ -28,7 +28,7 @@ $config = [
     'smtp_password' => '',
 
     // Google re-Captcha v.3 settings
-    'grecaptcha_enable' => false, // False by default. Get your keys from Google.
+    'grecaptcha_enabled' => false, // False by default. Get your keys from Google.
     'grecaptcha_site_key' => '', // Frontent key, included in pages
     'grecaptcha_secret_key' => '', // Server key, always hidden
 

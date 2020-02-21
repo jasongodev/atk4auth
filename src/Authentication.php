@@ -11,37 +11,46 @@ class Authentication
         init as _init;
     }
 
-    public $config = null;
-    public $user = null;
-    public $default_config = [
-        'pretty_links' => true,
-        'base_url' => '',
-        'get_auth' => 'auth',
-        'get_method' => 'method',
-        'get_redirect' => 'redirect',
-        'login_slug' => 'login',
-        'logout_slug' => 'logout',
-        'register_slug' => 'register',
-        'passwordless_slug' => 'link',
-        '2fa_slug' => '2fa',
-        'template' => __DIR__ . '/../template/narrow.html',
+    private $default_config = [
+        // Set true for systems with mod_rewrite and rewrite rules
+        // (Default) Set false for query strings appearing in the url
+        'pretty_links' => false,
+        
+        // 0 = (Default) Disable site-wide 2FA regardless of users settings
+        // 1 = Let the user set 2FA settings. Disabled by default.
+        // 2 = Mandatory 2FA. Users can not disable 2FA.
+        '2fa_enabled' => 0,
+    
+        // The users table name
         'user_table' => 'user',
+        // The users primary key
         'user_id_field' => 'id',
         'user_password_field' => 'password',
         'user_password_encryption' => PASSWORD_DEFAULT,
         'user_email_field' => 'email',
         'user_enable_2fa_field' => 'enable_2fa',
-        'enable_2fa' => 2, // 0=Disable, 1=Optional, 2=Mandatory
+        'user_totp_secret_field' => 'totp_secret',
+    
+        // Email settings for sending login link.
+        // Leaving the smtp_host blank will disable sending login links.
         'smtp_host' => '',
         'smtp_port' => '',
         'smtp_username' => '',
         'smtp_from' => '',
         'smtp_password' => '',
-        'grecaptcha_enable' => false,
+    
+        // Google re-Captcha v.3 settings
+        'grecaptcha_enabled' => false, // False by default. Get your keys from Google.
         'grecaptcha_site_key' => '', // Frontent key, included in pages
         'grecaptcha_secret_key' => '', // Server key, always hidden
-
-        //Providers specifics
+    
+        // Template files. Defaults to the template directory of the package assuming it resides in the root vendor directory.
+        'template_password' => __DIR__ . '/vendor/sirjasongo/atk4auth/template/narrow.html',
+        'template_provider' => __DIR__ . '/vendor/sirjasongo/atk4auth/template/narrow.html',
+        'template_2fa' => __DIR__ . '/vendor/sirjasongo/atk4auth/template/narrow.html',
+        //'template_email' => __DIR__ . '/vendor/sirjasongo/atk4auth/template/narrow.html',
+    
+         //Providers specifics
         'providers' => [
             'AOLOpenID'   => [
                 'enabled' => false,
@@ -461,8 +470,34 @@ class Authentication
                 'color'=>'red'
             ],
             
-        ]
+        ],   
+        // ------------------ STOP ----------------------
+        // The following below are usually left as it is.
+        // Change only when necessary...
+        // ----------------------------------------------
+    
+        // Base URL defaults to server name. Change this if your site resides in a subdirectory.
+        'base_url' => '',
+    
+        // The default query string name for the slugs.
+        'get_auth' => 'auth',
+    
+        // The default query string name for the provider method.
+        'get_method' => 'method',
+    
+        // The default query string name for the redirect url.
+        'get_redirect' => 'redirect',
+    
+        // The default auth slugs
+        'login_slug' => 'login',
+        'logout_slug' => 'logout',
+        'register_slug' => 'register',
+        'passwordless_slug' => 'link',
+        '2fa_slug' => '2fa',
     ];
+    
+    public $config = null;
+    public $user = null;
     public $auth_user = null;
     public $slug = null;
     public $method = null;
@@ -731,7 +766,7 @@ class Authentication
             return true;
         }
 
-        if ($this->config['enable_2fa']==2 or ($this->user[$this->config['user_enable_2fa_field']] and $this->config['enable_2fa']==1)) {
+        if ($this->config['2fa_enabled']==2 or ($this->user[$this->config['user_enable_2fa_field']] and $this->config['2fa_enabled']==1)) {
             $ga = new \PHPGangsta_GoogleAuthenticator();
             $ga_secret = $this->user['totp_secret'];
 
