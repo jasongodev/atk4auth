@@ -470,7 +470,7 @@ class Authentication
                 'color'=>'red'
             ],
             
-        ],   
+        ],
         // ------------------ STOP ----------------------
         // The following below are usually left as it is.
         // Change only when necessary...
@@ -635,8 +635,7 @@ class Authentication
             return true;
         }
 
-        if ($this->slug!='login' and $target_lock=='primary' and empty($_SESSION['auth_session']['primary']))
-        {
+        if ($this->slug!='login' and $target_lock=='primary' and empty($_SESSION['auth_session']['primary'])) {
             $this->app->redirect($this->getAuthURI('login'));
         }
 
@@ -649,8 +648,7 @@ class Authentication
         $form->buttonSave->addClass('large fluid green');
         $form->buttonSave->iconRight = 'right arrow';
         
-        if (empty($_SESSION['auth_session']['primary']))
-        {
+        if (empty($_SESSION['auth_session']['primary'])) {
             $form->addField('email', null, ['required' => true]);
         }
         
@@ -811,7 +809,7 @@ class Authentication
         }
     }
 
-    public function loginByProvider($target_lock, $method, $display)
+    public function loginByProvider($target_lock, $method, $display='window')
     {
         if (!empty($_SESSION['auth_session'][$target_lock])) {
             return true;
@@ -873,19 +871,16 @@ class Authentication
      */
     private function initializeTemplate(&$auth_app, $title = 'Authentication', $display='window')
     {
-        if ($display=='window')
-        {
+        if ($display=='window') {
             // Create a new atk4/ui app for the login or registration form.
-            $auth_app = new \atk4\ui\App($title . ' - ' . $this->app->title); 
+            $auth_app = new \atk4\ui\App($title . ' - ' . $this->app->title);
             $this->app->catch_runaway_callbacks = false;
             $this->app->run_called = true;
             $auth_app->catch_runaway_callbacks = false;
 
             // Load the page template. Can be overriden by $this->config['template'].
             $auth_app->initLayout(new \atk4\ui\View(['defaultTemplate' => $this->config['template']]));
-        }
-        else
-        {
+        } else {
             $auth_app = $this->app;
         }
 
