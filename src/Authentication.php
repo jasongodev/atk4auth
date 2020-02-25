@@ -663,10 +663,13 @@ class Authentication
         if ($target_lock=='primary') {
             $auth_app->add(['template'=>new \atk4\ui\Template('<div class="ui horizontal divider">Or Login Via</div>')]);
             $social_col = $auth_app->add(new \atk4\ui\Columns(['width'=>2]))->addClass('center aligned stackable');
-            $social_col->addColumn()->add(['Button', 'Facebook', 'facebook large fluid', 'icon'=>'facebook'])->link($this->getAuthURI('login', 'Facebook'));
-            $social_col->addColumn()->add(['Button', 'Google', 'google large fluid red', 'icon'=>'google'])->link($this->getAuthURI('login', 'Google'));
-            $social_col->addColumn()->add(['Button', 'Discord', 'discord large fluid violet', 'icon'=>'discord'])->link($this->getAuthURI('login', 'Discord'));
-            $social_col->addColumn()->add(['Button', 'GitLab', 'large fluid orange', 'icon'=>'gitlab'])->link($this->getAuthURI('login', 'Amazon'));
+            foreach ($this->config['providers'] as $provider_name => $provider)
+            {
+                if ($provider['enabled'])
+                {
+                    $social_col->addColumn()->add(['Button', $provider['name'], 'large fluid ' . $provider['color'], 'icon'=>$provider['icon']])->link($this->getAuthURI('login', $provider_name));
+                }
+            }       
         }
 
         $form->onSubmit(function ($form) use (&$auth_app, $target_lock) {
@@ -822,9 +825,18 @@ class Authentication
         // usually need a constant callback url.
         $_SESSION['auth_redirect'] = $this->config['base_url'] . $this->getRequestURI();
         $_SESSION['auth_current_target'] = $target_lock;
+        $method = is_array($method) ? $method : array_map('trim', explode(',', $method));
         $this->initializeTemplate($auth_app, 'Login', $display);
-        $auth_app->add('Header')->set('Login via ' . $method . ' is needed to proceed.')->addClass('center aligned');
-        $auth_app->add('Button', ['Proceed', 'green fluid'])->link($this->getAuthURI('relogin', $method));
+        $auth_app->add('Header')->set('Login via third party provider is needed to proceed.')->addClass('center aligned');
+        $social_col = $auth_app->add(new \atk4\ui\Columns(['width'=>2]))->addClass('center aligned stackable');
+        //$auth_app->add('Button', ['Proceed', 'green fluid'])->link($this->getAuthURI('relogin', $method));
+        foreach ($method as $m)
+        {
+            if (!empty($this->config['providers'][$m] and $this->config['providers'][$m]['enabled']))
+            {
+                $social_col->addColumn()->add(['Button', $this->config['providers'][$m]['name'], 'large fluid ' . $this->config['providers'][$m]['color'], 'icon'=>$this->config['providers'][$m]['icon']])->link($this->getAuthURI('relogin', $m));
+            }
+        }
         exit;
     }
 
