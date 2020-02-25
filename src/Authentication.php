@@ -811,7 +811,7 @@ class Authentication
         }
     }
 
-    public function loginByProvider($target_lock, $method)
+    public function loginByProvider($target_lock, $method, $display)
     {
         if (!empty($_SESSION['auth_session'][$target_lock])) {
             return true;
@@ -824,11 +824,7 @@ class Authentication
         // usually need a constant callback url.
         $_SESSION['auth_redirect'] = $this->config['base_url'] . $this->getRequestURI();
         $_SESSION['auth_current_target'] = $target_lock;
-        $a = $this->app->add(new \atk4\ui\View(['defaultTemplate' => $this->config['template']]));
-        $a->add('Header')->set('Login via ' . $method . ' is needed to proceed.')->addClass('center aligned');
-        $a->add('Button', ['Proceed', 'green fluid'])->link($this->getAuthURI('relogin', $method));
-exit;
-        $this->initializeTemplate($auth_app, 'Login');
+        $this->initializeTemplate($auth_app, 'Login', $display);
         $auth_app->add('Header')->set('Login via ' . $method . ' is needed to proceed.')->addClass('center aligned');
         $auth_app->add('Button', ['Proceed', 'green fluid'])->link($this->getAuthURI('relogin', $method));
         exit;
